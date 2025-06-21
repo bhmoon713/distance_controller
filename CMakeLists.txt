@@ -27,8 +27,12 @@ endif()
 add_executable(distance_controller src/distance_controller.cpp)
 ament_target_dependencies(distance_controller rclcpp geometry_msgs nav_msgs )
 
+add_executable(distance_controller_maze src/distance_controller_maze.cpp)
+ament_target_dependencies(distance_controller_maze rclcpp geometry_msgs nav_msgs )
+
 install(TARGETS
    distance_controller
+   distance_controller_maze
    DESTINATION lib/${PROJECT_NAME}
  )
 
