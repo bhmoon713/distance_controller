@@ -5,21 +5,22 @@
 #include <cmath>
 #include <algorithm>
 
+
 class DistanceController : public rclcpp::Node {
 public:
     DistanceController() : Node("distance_controller") {
         // Define relative movement goals (delta_x, delta_y)
         relative_goals = {
-            {0.0, 1.0},
-            {0.0, -1.0},
-            {0.0, -1.0},
-            {0.0, 1.0},
-            {1.0, 1.0},
-            {-1.0, -1.0},
-            {1.0, -1.0},
-            {-1.0, 1.0},
-            {1.0, 0.0},
-            {-1.0, 0.0}
+            {0.0, 1.0, +0.00000},
+            {0.0, -1.0, +0.00000},
+            {0.0, -1.0, +0.00000},
+            {0.0, 1.0, +0.00000},
+            {1.0, 1.0, +0.00000},
+            {-1.0, -1.0, +0.00000},
+            {1.0, -1.0, +0.00000},
+            {-1.0, 1.0, +0.00000},
+            {1.0, 0.0, +0.00000},
+            {-1.0, 0.0, +0.00000}
         };
 
         vel_pub = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
@@ -37,6 +38,7 @@ private:
     struct Goal {
         float x;
         float y;
+        float theta;
     };
 
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr vel_pub;
