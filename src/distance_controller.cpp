@@ -45,11 +45,11 @@ private:
     float prev_error_x = 0.0, integral_x = 0.0;
     float prev_error_y = 0.0, integral_y = 0.0;
 
-    float kp = 0.8;
+    float kp = 0.5;
     float ki = 0.01;
     float kd = 0.08;
 
-    float max_linear_speed = 0.5;
+    float max_linear_speed = 0.1;   //0.5
     float goal_tolerance = 0.04;
 
     int scene_number_;
@@ -68,7 +68,7 @@ private:
             case 2:
                 RCLCPP_INFO(this->get_logger(), "Scene 2: CyberWorld waypoints selected.");
                 relative_goals = {
-                    {1.0, 0.0, 0.0}, {0.0, -1.0, 0.0}, {0.0, 1.0, 0.0}, {-1.0, 0.0, 0.0}
+                    {1.0, 0.0, 0.0}, {0.0, -0.6, 0.0}, {0.0, 0.6, 0.0}, {-1.0, 0.0, 0.0}
                 };
                 break;
 
