@@ -4,24 +4,12 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
-
+#include <cstdlib>  // For std::atoi
 
 class DistanceController : public rclcpp::Node {
 public:
-    DistanceController() : Node("distance_controller") {
-        // Define relative movement goals (delta_x, delta_y)
-        relative_goals = {
-            {0.0, 1.0, +0.00000},
-            {0.0, -1.0, +0.00000},
-            {0.0, -1.0, +0.00000},
-            {0.0, 1.0, +0.00000},
-            {1.0, 1.0, +0.00000},
-            {-1.0, -1.0, +0.00000},
-            {1.0, -1.0, +0.00000},
-            {-1.0, 1.0, +0.00000},
-            {1.0, 0.0, +0.00000},
-            {-1.0, 0.0, +0.00000}
-        };
+    DistanceController(int scene_number) : Node("distance_controller"), scene_number_(scene_number) {
+        selectWaypoints();
 
         vel_pub = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 
@@ -57,14 +45,39 @@ private:
     float prev_error_x = 0.0, integral_x = 0.0;
     float prev_error_y = 0.0, integral_y = 0.0;
 
-    // float kp = 0.5, ki = 0.0125, kd = 0.0025;
-
-    float kp = 0.8;   // higier than 1.0 overshoots in xy motion
+    float kp = 0.5;
     float ki = 0.01;
     float kd = 0.08;
 
-    float max_linear_speed = 0.5;
-    float goal_tolerance = 0.04;
+    float max_linear_speed = 0.2;   //0.5
+    float goal_tolerance = 0.03;  //0.04
+
+    int scene_number_;
+
+    void selectWaypoints() {
+        switch (scene_number_) {
+            case 1:
+                RCLCPP_INFO(this->get_logger(), "Scene 1: Simulation waypoints selected.");
+                relative_goals = {
+                    {0.26, 0.0, 0.0}, {0.1, -0.1, 0.0}, {0.0, -1.0, 0.0}, {0.4, 0.0, 0.0},
+                    {0.0, 0.4, 0.0}, {0.4, 0.0, 0.0}, {0.0, 0.45, 0.0}, {0.4, 0.0, 0.0},
+                    {0.0, 0.75, 0.0}, {-0.4, 0.0, 0.0}, {0.0, -0.3, 0.0}, {-0.4, 0.0, 0.0}, {-0.25, 0.25, 0.0}, {-0.5, 0.0, 0.0}
+                };
+                break;
+
+            case 2:
+                RCLCPP_INFO(this->get_logger(), "Scene 2: CyberWorld waypoints selected.");
+                relative_goals = {
+                    {1.0, 0.0, 0.0}, {0.0, -0.6, 0.0}, {0.0, 0.6, 0.0}, {-1.0, 0.0, 0.0}
+                };
+                break;
+
+            default:
+                RCLCPP_ERROR(this->get_logger(), "Invalid scene number: %d", scene_number_);
+                rclcpp::shutdown();
+                break;
+        }
+    }
 
     void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
         current_x = msg->pose.pose.position.x;
@@ -80,7 +93,6 @@ private:
         if (!initialized || current_goal_index >= relative_goals.size())
             return;
 
-        // Set new goal relative to current position
         if (!goal_active) {
             current_target.x = current_x + relative_goals[current_goal_index].x;
             current_target.y = current_y + relative_goals[current_goal_index].y;
@@ -93,11 +105,9 @@ private:
         float error_y = current_target.y - current_y;
         float distance = std::sqrt(error_x * error_x + error_y * error_y);
 
-        RCLCPP_INFO(this->get_logger(),
-            "delta X: %.3f, delta Y: %.3f, Distance: %.3f",
-            error_x, error_y, distance);
+        RCLCPP_INFO(this->get_logger(), "delta X: %.3f, delta Y: %.3f, Distance: %.3f",
+                    error_x, error_y, distance);
 
-        // PID control
         integral_x += error_x;
         float derivative_x = (error_x - prev_error_x) / 0.1;
         float control_x = kp * error_x + ki * integral_x + kd * derivative_x;
@@ -142,7 +152,13 @@ private:
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<DistanceController>();
+    int scene_number = 1; // Default: Simulation
+
+    if (argc > 1) {
+        scene_number = std::atoi(argv[1]);
+    }
+
+    auto node = std::make_shared<DistanceController>(scene_number);
     rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;
