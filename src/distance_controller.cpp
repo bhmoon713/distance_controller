@@ -59,12 +59,12 @@ private:
 
     // float kp = 0.5, ki = 0.0125, kd = 0.0025;
 
-    float kp = 0.8;   // higier than 1.0 overshoots in xy motion
-    float ki = 0.01;
-    float kd = 0.08;
+    float kp = 1.2;   // higier than 1.0 overshoots in xy motion
+    float ki = 0.001;
+    float kd = 0.001;
 
-    float max_linear_speed = 0.5;
-    float goal_tolerance = 0.04;
+    float max_linear_speed = 1.0;
+    float goal_tolerance = 0.01;
 
     void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
         current_x = msg->pose.pose.position.x;
@@ -118,7 +118,7 @@ private:
             RCLCPP_INFO(this->get_logger(), "Relative Goal %zu reached", current_goal_index);
 
             geometry_msgs::msg::Twist stop;
-            for (int i = 0; i < 2; ++i) {
+            for (int i = 0; i < 6; ++i) {
                 vel_pub->publish(stop);
                 rclcpp::sleep_for(std::chrono::milliseconds(500));
             }
