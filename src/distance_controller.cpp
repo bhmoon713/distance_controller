@@ -58,7 +58,7 @@ private:
   float ki = 0.001;
   float kd = 0.001;
 
-  float max_linear_speed = 1.0;
+  float max_linear_speed = 0.2;
   float goal_tolerance = 0.01;
 
   int scene_number_;
